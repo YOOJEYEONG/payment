@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Box,
     TextField,
@@ -8,7 +9,8 @@ import {
     ListItemText,
     Select,
     Checkbox,
-    OutlinedInput, Button, styled
+    OutlinedInput, Button, styled,
+    Typography
 } from "@mui/material";
 import axios from "axios";
 import PgcodeSelect from './PgcodeSelect'
@@ -16,20 +18,31 @@ import PgcodeSelect from './PgcodeSelect'
 
 
 const PaymentRequest = () => {
+    const navigate = useNavigate();
+    const userId = "test_user_id"
+    const userName ="테스트"
+    const serviceName = "페이레터"
+    const clientId = "pay_test"
+    const productName = "테스트상품"
+    const returnUrl = "http://localhost:3000/result"
+    const callbackUrl = "http://localhost:3000/result"
+    const cancelUrl = "http://localhost:3000//cancel"
+
+
     const [paymentRequestDatas, setPaymentRequestDatas] = useState({
         pgcode : "",
-        user_id:"test_user_id",
-        user_name:"테스터",
-        service_name:"페이레터",
-        client_id:"pay_test",
-        order_no:"1234567890",
-        amount:"",
-        taxfree_amount: "",
-        tax_amount: "",
-        product_name:"테스트상품",
-        return_url:"https://testpg.payletter.com/result",
-        callback_url:"https://testpg.payletter.com/callback",
-        cancel_url:"https://testpg.payletter.com/cancel"
+        user_id: userId,
+        user_name: userName,
+        service_name: serviceName,
+        client_id: clientId,
+        order_no:"",
+        amount:0,
+        taxfree_amount: 0,
+        tax_amount: 0,
+        product_name:productName,
+        return_url: returnUrl,
+        callback_url: callbackUrl,
+        cancel_url: cancelUrl
     });
 
 
@@ -44,8 +57,8 @@ const PaymentRequest = () => {
         }
 
         setPaymentRequestDatas({
-            ...paymentRequestDatas, // 기존의 input 객체를 복사한 뒤
-            [name]: value // name 키를 가진 값을 value 로 설정
+            ...paymentRequestDatas,
+            [name]: value
         });
 
     };
@@ -96,20 +109,22 @@ const PaymentRequest = () => {
         <Box
             component="form"
             autoComplete="off"
-            sx={{display:'flex',flexDirection:'column',margin:1}}
+            sx={{display:'flex',flexDirection:'column',margin:1, alignItems: "center"}}
         >
+            <Typography variant="h2" component="h2">
+                결제요청
+            </Typography>;
             <PgcodeSelect pgcode={pgcode} handleChange={handleChange} />
-            <StyledTextField label="user_name" variant="outlined" name="user_name" value={user_name} onChange={handleChange} />
-            <StyledTextField label="user_id" variant="outlined" name="user_id" value={user_id} onChange={handleChange} />
-            <StyledTextField label="service_name" variant="outlined" name="service_name" value={service_name} onChange={handleChange} />
-            <StyledTextField label="client_id" variant="outlined" name="client_id" value={client_id} onChange={handleChange} />
+            <StyledTextField label="service_name" variant="outlined" name="service_name" value={serviceName} onChange={handleChange} />
             <StyledTextField label="amount" variant="outlined" name="amount" value={amount} onChange={handleChange} />
             <StyledTextField label="taxfree_amount" variant="outlined" name="taxfree_amount" value={taxfree_amount} onChange={handleChange} />
             <StyledTextField label="tax_amount" variant="outlined" name="tax_amount" value={tax_amount} onChange={handleChange} />
-            <StyledTextField label="product_name" variant="outlined" name="product_name" value={product_name} onChange={handleChange} />
+            <StyledTextField label="product_name" variant="outlined" name="product_name" value={productName} onChange={handleChange} />
 
             <Button type="submit" style={{width:300, margin:17}} variant="contained" onClick={onClickHandler}>전송</Button>
-
+            <Button style={{width:300, margin:17}} variant="contained" color="secondary" onClick={()=> {
+                navigate('/cancel')
+            }}>결제취소 페이지로</Button>
         </Box>
     );
 };

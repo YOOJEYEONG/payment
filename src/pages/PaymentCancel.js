@@ -1,14 +1,23 @@
 import React, {useState} from 'react';
-import {Box, Button, styled, TextField} from "@mui/material";
+import {Box, Button, styled, TextField, Typography} from "@mui/material";
 import axios from "axios";
+import PgcodeSelect from './PgcodeSelect'
+import { useNavigate } from 'react-router-dom';
+
+
+
 
 const PaymentCancel = () => {
+    const navigate = useNavigate();
+    const clientId = "pay_test"
+    const userId = "test_user_id"
+
     const [paymentCancelData, setPaymentCancelData] = useState({
-        pgcode : "mobile",
-        client_id:"pay_test",
-        user_id:"test_user_id",
-        tid:"tpay_test2018010123595900001",
-        amount : "",
+        pgcode : "",
+        client_id: clientId,
+        user_id: userId,
+        tid:"",
+        amount : 0,
         ip_addr:"",
     })
     const {pgcode, client_id, user_id, tid, amount, ip_addr} = paymentCancelData;
@@ -28,15 +37,21 @@ const PaymentCancel = () => {
 
     };
 
-    const onClickHandler = (e) => {
+    const onClickHandler = async(e) => {
+        console.log("paymentCancelData",paymentCancelData)
         e.preventDefault()
-        axios.post('v1.0/payments/request', paymentCancelData)
-            .then(function (response) {
-                console.log(response);
-            })
-            .catch(function (error) {
-                console.log(error);
+        try {
+            const response = await axios.post("/v1.0/payments/request", paymentCancelData, {
+                headers: {
+                    "Authorization": "PLKEY MTFBNTAzNTEwNDAxQUIyMjlCQzgwNTg1MkU4MkZENDA=",
+                    "Content-Type": "application/json"
+                }
             });
+            console.log("res", response.data);
+        } catch (e) {
+            console.log(e);
+        }
+
     }
 
     console.log(paymentCancelData)
@@ -46,15 +61,19 @@ const PaymentCancel = () => {
         <Box
             component="form"
             autoComplete="off"
-            sx={{display:'flex',flexDirection:'column',margin:1}}
+            sx={{display:'flex',flexDirection:'column',margin:1, alignItems: "center"}}
         >
-            <StyledTextField label="pgcode" variant="outlined" name="pgcode" value={pgcode} onChange={handleChange} />
-            <StyledTextField label="client_id" variant="outlined" name="client_id" value={client_id} onChange={handleChange}/>
-            <StyledTextField label="user_id" variant="outlined" name="user_id" value={user_id} onChange={handleChange}/>
+            <Typography variant="h2" component="h2">
+                결제취소
+            </Typography>;
+            <PgcodeSelect pgcode={pgcode} handleChange={handleChange} />
             <StyledTextField label="tid" variant="outlined" name="tid" value={tid} onChange={handleChange}/>
             <StyledTextField label="amount" variant="outlined" name="amount" value={amount} onChange={handleChange} />
             <StyledTextField label="ip_addr" variant="outlined" name="ip_addr" value={ip_addr} onChange={handleChange} />
             <Button type="submit" style={{width:300, margin:17}} variant="contained" onClick={onClickHandler}>전송</Button>
+            <Button style={{width:300, margin:17}} variant="contained" color="secondary" onClick={()=> {
+                navigate('/')
+            }}>결제요청 페이지로</Button>
         </Box>
     );
 };
