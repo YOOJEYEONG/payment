@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     Box,
     TextField,
@@ -133,22 +133,23 @@ const paymentWay = [
 
 const PaymentRequest = () => {
     const [paymentRequestDatas, setPaymentRequestDatas] = useState({
-        pgcode: "",
-        user_id: "test_user_id",
-        user_name: "테스터",
-        sercive_name:"페이레터",
-        client_id: "pay_test",
-        amount: "",
+        pgcode : "",
+        user_id:"test_user_id",
+        user_name:"테스터",
+        service_name:"페이레터",
+        client_id:"pay_test",
+        order_no:"1234567890",
+        amount:"",
         taxfree_amount: "",
         tax_amount: "",
-        product_name: "테스트상품",
-        order_no:"1234567890",
+        product_name:"테스트상품",
         return_url:"https://testpg.payletter.com/result",
         callback_url:"https://testpg.payletter.com/callback",
         cancel_url:"https://testpg.payletter.com/cancel"
     });
 
-    const {pgcode, user_id, user_name,sercive_name ,client_id ,amount, taxfree_amount, tax_amount, product_name, } = paymentRequestDatas;
+
+    const {pgcode, user_id, user_name,service_name ,client_id ,amount, taxfree_amount, tax_amount, product_name} = paymentRequestDatas;
 
 
     const handleChange = (e) => {
@@ -165,19 +166,47 @@ const PaymentRequest = () => {
 
     };
 
-    const onClickHandler = (e) => {
+
+
+    const onClickHandler = async (e) => {
         e.preventDefault()
-        axios.post('v1.0/payments/request', paymentRequestDatas)
-            .then(function (response) {
-                console.log(response);
-            })
-            .catch(function (error) {
-                console.log(error);
+        let newOrderNo = getOrderNo()
+
+        let newPaymentData = {
+            ...paymentRequestDatas,
+            order_no: newOrderNo
+        }
+        console.log("paymentRequestDatas",newPaymentData)
+        try {
+            const response = await axios.post("/v1.0/payments/request", newPaymentData, {
+                headers: {
+                    Authorization: "PLKEY MTFBNTAzNTEwNDAxQUIyMjlCQzgwNTg1MkU4MkZENDA=",
+                }
             });
+            console.log("res", response.data);
+            if(response.data.online_url){
+                window.open(response.data.online_url, "_blank", "width=300, height=100")
+            }
+        } catch (e) {
+            console.log(e);
+        }
     }
 
-    console.log(paymentRequestDatas)
+    const getOrderNo = () => {
+        let result = localStorage.getItem("order_no")
 
+        if(!result){
+            localStorage.setItem("order_no", "0")
+            result = Number(localStorage.getItem("order_no"))
+        }else {
+            result = Number(localStorage.getItem("order_no"))
+        }
+
+        result = String(result + 1)
+        localStorage.setItem('order_no', result)
+
+        return result
+    }
 
     return (
         <Box
@@ -205,7 +234,7 @@ const PaymentRequest = () => {
             </FormControl>
             <StyledTextField label="user_name" variant="outlined" name="user_name" value={user_name} onChange={handleChange} />
             <StyledTextField label="user_id" variant="outlined" name="user_id" value={user_id} onChange={handleChange} />
-            <StyledTextField label="sercive_name" variant="outlined" name="sercive_name" value={sercive_name} onChange={handleChange} />
+            <StyledTextField label="service_name" variant="outlined" name="service_name" value={service_name} onChange={handleChange} />
             <StyledTextField label="client_id" variant="outlined" name="client_id" value={client_id} onChange={handleChange} />
             <StyledTextField label="amount" variant="outlined" name="amount" value={amount} onChange={handleChange} />
             <StyledTextField label="taxfree_amount" variant="outlined" name="taxfree_amount" value={taxfree_amount} onChange={handleChange} />
